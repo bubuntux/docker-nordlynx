@@ -3,18 +3,18 @@
 if [[ -z ${PUBLIC_KEY} || -z ${END_POINT} ]]; then
   echo "[$(date -Iseconds)] Finding the best server..."
   recommendations=$(curl --retry 3 -LsS "https://api.nordvpn.com/v1/servers/recommendations?&filters\[servers_technologies\]\[identifier\]=wireguard_udp&limit=1000000&${QUERY}")
-  recommendations=$(jq --raw-output "[first(.[] | select(${QUERY_JQ:-.}))]" <<< ${recommendations})
-  server=$(jq -r '.[0] | del(.services, .technologies)' <<< "${recommendations}")
+  recommendation=$(jq --raw-output "first(.[] | select(${QUERY_JQ:-.}))" <<< ${recommendations})
+  server=$(jq -r 'del(.services, .technologies)' <<< "${recommendation}")
   if [[ -z ${server} ]]; then
     echo "[$(date -Iseconds)] Unable to select a server ¯\_(⊙︿⊙)_/¯"
     sleep infinity
   fi
   echo "[$(date -Iseconds)] Using server: ${server}"
   if [[ -z ${PUBLIC_KEY} ]]; then
-    PUBLIC_KEY=$(jq -r '.[0].technologies[] | select( .identifier == "wireguard_udp" ) | .metadata[] | select( .name == "public_key" ) | .value' <<< "${recommendations}")
+    PUBLIC_KEY=$(jq -r '.technologies[] | select( .identifier == "wireguard_udp" ) | .metadata[] | select( .name == "public_key" ) | .value' <<< "${recommendation}")
   fi
   if [[ -z ${END_POINT} ]]; then
-    END_POINT=$(jq -r '.[0].hostname' <<< "${recommendations}"):51820
+    END_POINT=$(jq -r '.hostname' <<< "${recommendation}"):51820
   fi
 fi
 
