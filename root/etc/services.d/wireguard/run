@@ -2,7 +2,8 @@
 
 if [[ -z ${PUBLIC_KEY} || -z ${END_POINT} ]]; then
   echo "[$(date -Iseconds)] Finding the best server..."
-  recommendations=$(curl --retry 3 -LsS "https://api.nordvpn.com/v1/servers/recommendations?&filters\[servers_technologies\]\[identifier\]=wireguard_udp&limit=1&${QUERY}")
+  recommendations=$(curl --retry 3 -LsS "https://api.nordvpn.com/v1/servers/recommendations?&filters\[servers_technologies\]\[identifier\]=wireguard_udp&limit=1000000&${QUERY}")
+  recommendations=$(jq --raw-output "[first(.[] | select(${QUERY_JQ:-.}))]" <<< ${recommendations})
   server=$(jq -r '.[0] | del(.services, .technologies)' <<< "${recommendations}")
   if [[ -z ${server} ]]; then
     echo "[$(date -Iseconds)] Unable to select a server ¯\_(⊙︿⊙)_/¯"
