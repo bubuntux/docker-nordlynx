@@ -59,7 +59,6 @@ Here are some example snippets to help you get started creating a container.
 ### docker-compose (recommended, [click here for more info](https://docs.docker.com/compose/))
 
 ```yaml
----
 version: "3"
 services:
   nordlynx:
@@ -68,12 +67,19 @@ services:
       - NET_ADMIN #required
     environment:
       - PRIVATE_KEY=xxxxxxxxx #required
+      - NET_LOCAL=192.168.0.0/16  # So connected containers can still be accessed within the local network
+      - QUERY=filters\[country_id\]=209 # 209 = Switzerland. look up the country codes here: https://github.com/bubuntux/nordlynx/discussions/8#discussioncomment-1841877
+    ports:
+      - 80:80 # add port mapping of *any* container you connect here instead of the container
+  whoami:
+    image: traefik/whoami
+    network_mode: service:nordlynx # this tells docker to route this container’s traffik through nordlynx.
 ```
 
 ### docker-compose (using secret)
 
 ```yaml
-version: "3.9"
+version: "3"
 services:
   nordlynx:
     image: ghcr.io/bubuntux/nordlynx
@@ -81,8 +87,15 @@ services:
       - NET_ADMIN #required
     environment:
       - PRIVATE_KEY_FILE=/run/secrets/privatekey
+      - NET_LOCAL=192.168.0.0/16  # So connected containers can still be accessed within the local network
+      - QUERY=filters\[country_id\]=209 # 209 = Switzerland. look up the country codes here: https://github.com/bubuntux/nordlynx/discussions/8#discussioncomment-1841877
     secrets:
       - privatekey 
+    ports:
+      - 80:80 # add port mapping of *any* container you connect here instead of the container
+  whoami:
+    image: traefik/whoami
+    network_mode: service:nordlynx # this tells docker to route this container’s traffik through nordlynx.
 secrets:
   privatekey:
     file: ./privatekey.txt
