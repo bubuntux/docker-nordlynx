@@ -13,14 +13,14 @@ for interface in "${interfaces[@]}"; do
     continue
   fi
   if [ "$network_found" = false ]; then
-    ip6tables -F
-    ip6tables -X
+    ip6tables-legacy -F
+    ip6tables-legacy -X
   fi
   echo "[$(date -Iseconds)] Enabling connection to ${interface} ${inet}"
-  ip6tables -A INPUT -i "$interface" -s "${inet}" -j ACCEPT
-  ip6tables -A OUTPUT -o "$interface" -d "${inet}" -j ACCEPT
-  ip6tables -A FORWARD -i "$interface" -d "${inet}" -j ACCEPT
-  ip6tables -A FORWARD -i "$interface" -s "${inet}" -j ACCEPT
+  ip6tables-legacy -A INPUT -i "$interface" -s "${inet}" -j ACCEPT
+  ip6tables-legacy -A OUTPUT -o "$interface" -d "${inet}" -j ACCEPT
+  ip6tables-legacy -A FORWARD -i "$interface" -d "${inet}" -j ACCEPT
+  ip6tables-legacy -A FORWARD -i "$interface" -s "${inet}" -j ACCEPT
   network_found=true
 done
 
@@ -31,21 +31,21 @@ fi
 
 echo "[$(date -Iseconds)] Enabling connection to secure interfaces"
 
-ip6tables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-ip6tables -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-ip6tables -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+ip6tables-legacy -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+ip6tables-legacy -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+ip6tables-legacy -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
-ip6tables -A INPUT -i lo -j ACCEPT
-ip6tables -A OUTPUT -o lo -j ACCEPT
-ip6tables -A FORWARD -i lo -j ACCEPT
+ip6tables-legacy -A INPUT -i lo -j ACCEPT
+ip6tables-legacy -A OUTPUT -o lo -j ACCEPT
+ip6tables-legacy -A FORWARD -i lo -j ACCEPT
 
-ip6tables -A OUTPUT -o wg+ -j ACCEPT
-ip6tables -t nat -A POSTROUTING -o wg+ -j MASQUERADE
+ip6tables-legacy -A OUTPUT -o wg+ -j ACCEPT
+ip6tables-legacy -t nat -A POSTROUTING -o wg+ -j MASQUERADE
 
-ip6tables -A OUTPUT -o "$iface" -p udp -m udp --dport 53 -j ACCEPT
-ip6tables -A OUTPUT -o "$iface" -p udp -m udp --dport 51820 -j ACCEPT
+ip6tables-legacy -A OUTPUT -o "$iface" -p udp -m udp --dport 53 -j ACCEPT
+ip6tables-legacy -A OUTPUT -o "$iface" -p udp -m udp --dport 51820 -j ACCEPT
 while true; do
-  ip6tables -A OUTPUT -o "$iface" -d api.nordvpn.com -p tcp --dport 443 -j ACCEPT\
+  ip6tables-legacy -A OUTPUT -o "$iface" -d api.nordvpn.com -p tcp --dport 443 -j ACCEPT\
     || {
       echo "Seems like we have no internet connection. Retrying in $no_connenction_retry seconds..."
       sleep ${no_connenction_retry}
