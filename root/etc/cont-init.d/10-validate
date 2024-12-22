@@ -8,8 +8,8 @@ else
   sleep infinity
 fi
 
-if ! iptables -L > /dev/null 2>&1; then
-  echo "[$(date -Iseconds)] iptables is not functional. Ensure your container config adds --cap-add=NET_RAW" 
+if ! iptables-legacy -L > /dev/null 2>&1; then
+  echo "[$(date -Iseconds)] iptables-legacy is not functional. Ensure your container config adds --cap-add=NET_RAW" 
   sleep infinity
 fi
 
